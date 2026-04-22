@@ -1,0 +1,110 @@
+<script>
+    function toggleNeedle() {
+        const site = document.getElementById('anesSite').value;
+        const needleDiv = document.getElementById('needleDiv');
+        needleDiv.style.display = (site === "IAN block") ? "block" : "none";
+    }
+
+    function generate() {
+        const proc = document.getElementById('proc').value;
+        const narr = document.getElementById('narrative').value;
+        const teeth = document.getElementById('teethSurface').value || "[#]";
+        const shade = document.getElementById('shade').value || "[SHADE]";
+        const cc = document.getElementById('ccManual').value || "none";
+        const bp = document.getElementById('bp').value || "not recorded";
+        const endoDx = document.getElementById('endoDx').value || "[ENDO DX]";
+        
+        // New Anesthesia Logic
+        const anesType = document.getElementById('anesType').value;
+        const anesCarps = document.getElementById('anesCarps').value;
+        const anesSite = document.getElementById('anesSite').value;
+        const needle = document.getElementById('needleGauge').value;
+        
+        let anesString = `${anesCarps} carp ${anesType} via ${anesSite}`;
+        if (anesSite === "IAN block") {
+            anesString += ` (${needle} needle)`;
+        }
+
+        const sig = "RSiu DMD; Assistant Leng.";
+        const consent = "consent: risks, benefits, and alternatives discussed; patient understood all risks and consented to treatment.";
+        const complications = "complications: none; patient tolerated procedure well.";
+
+        let lines = [];
+        let narrativeBlock = "";
+
+        // logic for specific templates to avoid "as per protocol"
+        if (proc === "composite") {
+            lines.push(`tx: ${teeth} composite restoration\n`);
+            lines.push(`cc: ${cc}`);
+            lines.push(`mh: reviewed/updated. bp: ${bp}`);
+            lines.push(`tx rendered: risks/benefits/alternatives/post-op sensitivity warning discussed and consented; anes: ${anesString}; cotton roll isolation; prep w/ hs/ls burs for caries removal; matrix w/ garrison sectional system and wooden wedge; bond w/ selective enamel etch, clearfil se primer (20s) and bond, light-cured; restorative w/ filtek supreme incremental application, light-cured; occlusion checked/adjusted; polished.`);
+            lines.push(complications);
+        }
+        else if (proc === "pulp_cap") {
+            lines.push(`tx: ${teeth} composite w/ indirect pulp cap\n`);
+            lines.push(`cc: ${cc}`);
+            lines.push(`mh: reviewed/updated. bp: ${bp}`);
+            lines.push(`tx rendered: risks/benefits/alternatives/post-op sensitivity warning discussed and consented; warning: advised patient that due to deep decay, rct may be needed if sensitivity persists/worsens; anes: ${anesString}; cotton roll isolation; prep w/ hs/ls burs for caries removal; indirect pulp cap placed w/ (dycal/vitrebond/limelite); bond/restore as per protocol; occlusion checked/adjusted; polished.`);
+            lines.push(complications);
+        }
+        else if (proc === "crown_prep") {
+            lines.push(`tx: ${teeth} (${shade}) crown, ${teeth} core buildup\n`);
+            lines.push(`cc: none`);
+            lines.push(`mh: reviewed/updated. bp: ${bp}`);
+            lines.push(`tx rendered: risks/benefits/alternatives discussed and consented; anes: ${anesString}; cotton roll isolation; prep w/ hs/ls burs; buildup placed; crown prep completed; digital impression; temp crown cemented w/ temp-bond ne; occlusion adjusted.`);
+            lines.push(complications);
+        }
+        else if (proc === "endo") {
+            lines.push(`tx: ${teeth} RCT\n`);
+            lines.push(`cc: ${cc}`);
+            lines.push(`mh: reviewed/updated. bp: ${bp}`);
+            lines.push(`anes: ${anesString}`);
+            lines.push(`tx rendered: risks/benefits/alternatives discussed and consented; rubber dam isolation; mechanical instrumentation; irrigation w/ NaOCl and EDTA; obturated using single cone technique; orifice sealed; temp restoration.`);
+            lines.push(complications);
+        }
+        else if (proc === "simple_ext") {
+            lines.push(`tx: ${teeth} extraction\n`);
+            lines.push(`cc: ${cc}`);
+            lines.push(`mh: reviewed/updated. bp: ${bp}`);
+            lines.push(`tx rendered: risks/benefits/alternatives/post-op instructions discussed; anes: ${anesString}; luxated and delivered w/ elevators and forceps; hemostasis achieved.`);
+            lines.push(complications);
+        }
+        else if (proc === "final_imp") {
+            lines.push(`tx: final impression for denture\n`);
+            lines.push(`cc: none`);
+            lines.push(`tx rendered: custom tray verified; border molding w/ green stick; final impression taken w/ PVS; good detail of vestibules and landmarks captured.`);
+            lines.push(complications);
+        }
+        else if (proc === "wax_tryin") {
+            lines.push(`tx: denture wax try-in\n`);
+            lines.push(`cc: none`);
+            lines.push(`tx rendered: wax rims tried in; VDO/VDR verified; esthetics and phonetics approved by patient; shade and mold confirmed.`);
+            lines.push(complications);
+        }
+        else if (proc === "recall") {
+            lines.push(`tx: recall exam, 2BWs, 1 unit scale, polish\n`);
+            lines.push(`cc: ${cc}`);
+            lines.push(`mh: reviewed and updated. bp: ${bp}`);
+            lines.push(`ioe: no new findings; stable oral health; 6mr recommended.`);
+        }
+        else {
+            // Default generic if you haven't added specific details yet
+            lines.push(`tx: ${proc.toUpperCase()} on ${teeth}\n`);
+            lines.push(`cc: ${cc}`);
+            lines.push(`anes: ${anesString}`);
+            lines.push(`tx rendered: Clinical steps performed for ${proc.replace('_', ' ')}.`);
+            lines.push(complications);
+        }
+
+        // Add Narratives
+        if (narr === "bruxism") narrativeBlock = "\nnarrative: evidence of bruxism/clenching with significant attrition and wear facets.";
+        if (narr === "deep_decay") narrativeBlock = "\nwarning: advised patient that due to deep decay, rct may be needed.";
+
+        document.getElementById('output').innerText = lines.join('\n') + narrativeBlock + "\n\n" + sig;
+    }
+
+    function copyText() {
+        const text = document.getElementById('output').innerText;
+        navigator.clipboard.writeText(text).then(() => { alert("Note Copied!"); });
+    }
+</script>
